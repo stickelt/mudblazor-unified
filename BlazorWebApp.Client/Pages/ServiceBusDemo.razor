@@ -1,0 +1,315 @@
+@page "/servicebus"
+@rendermode InteractiveAuto
+@using BlazorWebApp.Client.Services
+@using MudBlazor
+@inject ServiceBusClientService ServiceBusClient
+@inject IJSRuntime JSRuntime
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+    <MudCard Elevation="3" Class="rounded-lg">
+        <MudCardHeader>
+            <MudText Typo="Typo.h4">Azure Service Bus Demo</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body1" Class="mb-4">
+                This demo allows you to send and receive messages using Azure Service Bus queues and topics.
+            </MudText>
+
+            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+                <MudTabPanel Text="Queue">
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.h5" Class="mb-4">Queue Operations</MudText>
+                            <MudText Typo="Typo.body2" Class="mb-4">
+                                Send messages to a queue and receive them in a first-in, first-out (FIFO) manner.
+                            </MudText>
+                        </MudItem>
+                        
+                        <MudItem xs="12" md="6">
+                            <MudCard Elevation="2" Class="pa-4">
+                                <MudCardHeader>
+                                    <MudText Typo="Typo.h6">Send Message to Queue</MudText>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudTextField @bind-Value="QueueMessage" Label="Message" 
+                                                 Variant="Variant.Outlined" Lines="3" />
+                                    
+                                    <MudTextField @bind-Value="QueueName" Label="Queue Name (optional)" 
+                                                 Variant="Variant.Outlined" 
+                                                 HelperText="Leave empty to use default queue" 
+                                                 Class="mt-3" />
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Filled" 
+                                               Color="Color.Primary" 
+                                               OnClick="SendToQueue" 
+                                               Disabled="@(string.IsNullOrEmpty(QueueMessage) || IsBusy)"
+                                               StartIcon="@Icons.Material.Filled.Send">
+                                        Send
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                        
+                        <MudItem xs="12" md="6">
+                            <MudCard Elevation="2" Class="pa-4">
+                                <MudCardHeader>
+                                    <MudText Typo="Typo.h6">Receive Message from Queue</MudText>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudTextField @bind-Value="ReceivedQueueMessage" Label="Received Message" 
+                                                 Variant="Variant.Outlined" Lines="3" ReadOnly="true" />
+                                    
+                                    <MudTextField @bind-Value="ReceiveQueueName" Label="Queue Name (optional)" 
+                                                 Variant="Variant.Outlined" 
+                                                 HelperText="Leave empty to use default queue" 
+                                                 Class="mt-3" />
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Filled" 
+                                               Color="Color.Secondary" 
+                                               OnClick="ReceiveFromQueue" 
+                                               Disabled="@IsBusy"
+                                               StartIcon="@Icons.Material.Filled.Download">
+                                        Receive
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+                
+                <MudTabPanel Text="Topic">
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.h5" Class="mb-4">Topic Operations</MudText>
+                            <MudText Typo="Typo.body2" Class="mb-4">
+                                Send messages to a topic and receive them from a subscription.
+                            </MudText>
+                        </MudItem>
+                        
+                        <MudItem xs="12" md="6">
+                            <MudCard Elevation="2" Class="pa-4">
+                                <MudCardHeader>
+                                    <MudText Typo="Typo.h6">Send Message to Topic</MudText>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudTextField @bind-Value="TopicMessage" Label="Message" 
+                                                 Variant="Variant.Outlined" Lines="3" />
+                                    
+                                    <MudTextField @bind-Value="TopicName" Label="Topic Name (optional)" 
+                                                 Variant="Variant.Outlined" 
+                                                 HelperText="Leave empty to use default topic" 
+                                                 Class="mt-3" />
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Filled" 
+                                               Color="Color.Primary" 
+                                               OnClick="SendToTopic" 
+                                               Disabled="@(string.IsNullOrEmpty(TopicMessage) || IsBusy)"
+                                               StartIcon="@Icons.Material.Filled.Send">
+                                        Send
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                        
+                        <MudItem xs="12" md="6">
+                            <MudCard Elevation="2" Class="pa-4">
+                                <MudCardHeader>
+                                    <MudText Typo="Typo.h6">Receive Message from Subscription</MudText>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudTextField @bind-Value="ReceivedSubscriptionMessage" Label="Received Message" 
+                                                 Variant="Variant.Outlined" Lines="3" ReadOnly="true" />
+                                    
+                                    <MudTextField @bind-Value="ReceiveTopicName" Label="Topic Name (optional)" 
+                                                 Variant="Variant.Outlined" 
+                                                 HelperText="Leave empty to use default topic" 
+                                                 Class="mt-3" />
+                                                 
+                                    <MudTextField @bind-Value="SubscriptionName" Label="Subscription Name (optional)" 
+                                                 Variant="Variant.Outlined" 
+                                                 HelperText="Leave empty to use default subscription" 
+                                                 Class="mt-3" />
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Filled" 
+                                               Color="Color.Secondary" 
+                                               OnClick="ReceiveFromSubscription" 
+                                               Disabled="@IsBusy"
+                                               StartIcon="@Icons.Material.Filled.Download">
+                                        Receive
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+            </MudTabs>
+            
+            @if (!string.IsNullOrEmpty(StatusMessage))
+            {
+                <MudAlert Severity="@StatusSeverity" Class="mt-4" ShowCloseIcon="true" CloseIconClicked="() => StatusMessage = null">
+                    @StatusMessage
+                </MudAlert>
+            }
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    // Queue properties
+    private string QueueMessage { get; set; } = string.Empty;
+    private string QueueName { get; set; } = string.Empty;
+    private string ReceivedQueueMessage { get; set; } = string.Empty;
+    private string ReceiveQueueName { get; set; } = string.Empty;
+    
+    // Topic properties
+    private string TopicMessage { get; set; } = string.Empty;
+    private string TopicName { get; set; } = string.Empty;
+    private string ReceivedSubscriptionMessage { get; set; } = string.Empty;
+    private string ReceiveTopicName { get; set; } = string.Empty;
+    private string SubscriptionName { get; set; } = string.Empty;
+    
+    // Status properties
+    private string? StatusMessage { get; set; }
+    private Severity StatusSeverity { get; set; } = Severity.Info;
+    private bool IsBusy { get; set; } = false;
+    
+    private async Task SendToQueue()
+    {
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Sending message to queue...";
+            StatusSeverity = Severity.Info;
+            
+            var response = await ServiceBusClient.SendToQueueAsync(QueueMessage, QueueName);
+            
+            if (response.Success)
+            {
+                StatusMessage = $"Success: {response.Message}";
+                StatusSeverity = Severity.Success;
+                QueueMessage = string.Empty; // Clear the message field
+            }
+            else
+            {
+                StatusMessage = $"Error: {response.Message}";
+                StatusSeverity = Severity.Error;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error: {ex.Message}";
+            StatusSeverity = Severity.Error;
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error sending to queue: {ex}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    
+    private async Task ReceiveFromQueue()
+    {
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Receiving message from queue...";
+            StatusSeverity = Severity.Info;
+            
+            var response = await ServiceBusClient.ReceiveFromQueueAsync(ReceiveQueueName);
+            
+            if (response.Success)
+            {
+                ReceivedQueueMessage = response.Message;
+                StatusMessage = "Message received successfully";
+                StatusSeverity = Severity.Success;
+            }
+            else
+            {
+                StatusMessage = $"Error: {response.Message}";
+                StatusSeverity = Severity.Error;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error: {ex.Message}";
+            StatusSeverity = Severity.Error;
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error receiving from queue: {ex}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    
+    private async Task SendToTopic()
+    {
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Sending message to topic...";
+            StatusSeverity = Severity.Info;
+            
+            var response = await ServiceBusClient.SendToTopicAsync(TopicMessage, TopicName);
+            
+            if (response.Success)
+            {
+                StatusMessage = $"Success: {response.Message}";
+                StatusSeverity = Severity.Success;
+                TopicMessage = string.Empty; // Clear the message field
+            }
+            else
+            {
+                StatusMessage = $"Error: {response.Message}";
+                StatusSeverity = Severity.Error;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error: {ex.Message}";
+            StatusSeverity = Severity.Error;
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error sending to topic: {ex}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    
+    private async Task ReceiveFromSubscription()
+    {
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Receiving message from subscription...";
+            StatusSeverity = Severity.Info;
+            
+            var response = await ServiceBusClient.ReceiveFromSubscriptionAsync(ReceiveTopicName, SubscriptionName);
+            
+            if (response.Success)
+            {
+                ReceivedSubscriptionMessage = response.Message;
+                StatusMessage = "Message received successfully";
+                StatusSeverity = Severity.Success;
+            }
+            else
+            {
+                StatusMessage = $"Error: {response.Message}";
+                StatusSeverity = Severity.Error;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error: {ex.Message}";
+            StatusSeverity = Severity.Error;
+            await JSRuntime.InvokeVoidAsync("console.error", $"Error receiving from subscription: {ex}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}

@@ -24,6 +24,9 @@ builder.Services.AddScoped<IWizardFormService, BlazorWebApp.Services.WizardFormS
 //  above is scoped -  one instance of the service is created per http request  (  or per user circuit in blazor server)
 // shouldn't be shared across all users ( that is a singleton
 
+// Register Azure Service Bus service
+builder.Services.AddSingleton<BlazorWebApp.Services.ServiceBusService>();
+
 // Register client-side services for server-side rendering of client components
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<WizardStateService>();

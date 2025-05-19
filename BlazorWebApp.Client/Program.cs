@@ -13,4 +13,7 @@ builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<WizardStateService>();
 
+// Register the Service Bus client service
+builder.Services.AddScoped<BlazorWebApp.Client.Services.ServiceBusClientService>();
+
 await builder.Build().RunAsync();

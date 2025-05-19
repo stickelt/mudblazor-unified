@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <ProjectReference Include="..\BlazorWebApp.Shared\BlazorWebApp.Shared.csproj" />
     <ProjectReference Include="..\BlazorWebApp.Client\BlazorWebApp.Client.csproj" />

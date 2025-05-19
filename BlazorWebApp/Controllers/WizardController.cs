@@ -1,6 +1,7 @@
 ﻿using BlazorWebApp.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BlazorWebApp.Controllers
 {
@@ -9,9 +10,12 @@ namespace BlazorWebApp.Controllers
     public class WizardController : ControllerBase
     {
         private readonly IWizardFormService _service;
-        public WizardController(IWizardFormService service)
+        private readonly ILogger<WizardController> _logger;
+
+        public WizardController(IWizardFormService service, ILogger<WizardController> logger)
         {
             _service = service;
+            _logger = logger;
         }
         [HttpPost("submit")]
         public async Task<IActionResult> Submit([FromBody] WizardFormData data)
@@ -30,6 +34,11 @@ namespace BlazorWebApp.Controllers
                 Console.WriteLine($"*** User Agent: {HttpContext.Request.Headers["User-Agent"]}");
                 Console.WriteLine("*******************************************************************");
                 Console.ResetColor();
+
+                // Also log to the server's logger
+                _logger.LogInformation("SERVER CONTROLLER CALLED: Received form submission");
+                _logger.LogInformation("First Name: {FirstName}, Last Name: {LastName}", data.FirstName, data.LastName);
+                _logger.LogInformation("Request Path: {Path}, Method: {Method}", HttpContext.Request.Path, HttpContext.Request.Method);
 
                 // Process the form data
                 await _service.SubmitFormAsync(data);
