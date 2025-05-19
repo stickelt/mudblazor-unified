@@ -10,7 +10,7 @@
 @inject WizardStateService StateService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
-@inject HttpClient httpClient
+@inject HttpClient? httpClient
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     <MudCard Elevation="3" Class="rounded-lg">
@@ -135,6 +135,22 @@
         {
             await LogToConsole("OnSubmit called");
             await LogToConsole($"Submitting form data: {JsonSerializer.Serialize(StateService.FormData)}");
+
+            // Make sure HttpClient is available (might not be during prerendering)
+            if (httpClient == null)
+            {
+                await LogToConsole("HttpClient is not available, using WizardService instead");
+                await WizardService.SubmitFormAsync(StateService.FormData);
+                _serverResponse = new Dictionary<string, object>
+                {
+                    { "message", "Form submitted via service" },
+                    { "timestamp", DateTime.Now.ToString() },
+                    { "responseId", "service-call" }
+                };
+                _submitted = true;
+                await StateService.ClearStateAsync();
+                return;
+            }
 
             // Call the API endpoint directly to capture the response
             var response = await httpClient.PostAsJsonAsync("api/wizard/submit", StateService.FormData);
