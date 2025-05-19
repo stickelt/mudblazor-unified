@@ -1,8 +1,11 @@
-﻿@using BlazorWebApp.Shared
+@using BlazorWebApp.Shared
 @using MudBlazor
+@using BlazorWebApp.Client.Services
+@inject WizardStateService StateService
 
 <MudTextField Label="First Name"
-              @bind-Value="FormData.FirstName"
+              Value="FormData.FirstName"
+              ValueChanged="@(async (string val) => await OnFirstNameChanged(val))"
               Required="true"
               Variant="Variant.Outlined"
               FullWidth="true"
@@ -11,10 +14,10 @@
 
 @code {
     [Parameter] public required WizardFormData FormData { get; set; }
-    // Parameter is blazor specific,  it tell blazor  "this property CAN be set by the parent component or by markup
-    // whenever the component is used
-
-
-    //[CascadingParameter] is another Blazor attribute for properties, but it’s for receiving data “from above”
-    // in the component hierarchy—without the parent having to pass it directly.
+    
+    private async Task OnFirstNameChanged(string value)
+    {
+        FormData.FirstName = value;
+        await StateService.UpdateFormDataAsync(FormData);
+    }
 }

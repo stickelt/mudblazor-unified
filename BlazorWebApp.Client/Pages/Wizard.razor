@@ -3,7 +3,9 @@
 @using BlazorWebApp.Shared
 @using MudBlazor
 @using BlazorWebApp.Client.Pages
+@using BlazorWebApp.Client.Services
 @inject IWizardFormService WizardService
+@inject WizardStateService StateService
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     <MudCard Elevation="3" Class="rounded-lg">
@@ -11,17 +13,17 @@
             <MudText Typo="Typo.h5">Multi-Step Form</MudText>
         </MudCardHeader>
         <MudCardContent>
-            <MudStepper @bind-Value="_activeStep" Linear="true" Color="Color.Primary">
+            <MudStepper @bind-Value="StateService.CurrentStep" Linear="true" Color="Color.Primary">
                 <MudStep Title="Personal Info" Icon="@Icons.Material.Filled.Person">
                     <MudText Typo="Typo.h6" Class="mb-4">First Name</MudText>
-                    <BlazorWebApp.Client.Pages.WizardStep1 FormData="_formData" />
+                    <BlazorWebApp.Client.Pages.WizardStep1 FormData="StateService.FormData" />
                     <div class="d-flex justify-end mt-4">
                         <MudButton T="string" Variant="Variant.Filled" Color="Color.Primary" OnClick="@NextStep">Next</MudButton>
                     </div>
                 </MudStep>
                 <MudStep Title="Additional Info" Icon="@Icons.Material.Filled.Info">
                     <MudText Typo="Typo.h6" Class="mb-4">Last Name</MudText>
-                    <BlazorWebApp.Client.Pages.WizardStep2 FormData="_formData" />
+                    <BlazorWebApp.Client.Pages.WizardStep2 FormData="StateService.FormData" />
                     <div class="d-flex justify-space-between mt-4">
                         <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Back</MudButton>
                         <MudButton T="string" Variant="Variant.Filled" Color="Color.Primary" OnClick="@NextStep">Next</MudButton>
@@ -29,7 +31,7 @@
                 </MudStep>
                 <MudStep Title="Review & Submit" Icon="@Icons.Material.Filled.CheckCircle">
                     <MudText Typo="Typo.h6" Class="mb-4">Review Your Information</MudText>
-                    <BlazorWebApp.Client.Pages.WizardReview FormData="_formData" />
+                    <BlazorWebApp.Client.Pages.WizardReview FormData="StateService.FormData" />
                     <div class="d-flex justify-space-between mt-4">
                         <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Back</MudButton>
                         <MudButton T="string" Variant="Variant.Filled" Color="Color.Success" OnClick="@OnSubmit">Submit</MudButton>
@@ -45,23 +47,35 @@
 </MudContainer>
 
 @code {
-    private int _activeStep = 0;
-    private WizardFormData _formData = new();
     private bool _submitted = false;
 
-    private void NextStep()
+    protected override async Task OnInitializedAsync()
     {
-        if (_activeStep < 2) _activeStep++;
+        await StateService.InitializeAsync();
     }
 
-    private void PrevStep()
+    private async Task NextStep()
     {
-        if (_activeStep > 0) _activeStep--;
+        if (StateService.CurrentStep < 2)
+        {
+            await StateService.NextStepAsync();
+        }
+    }
+
+    private async Task PrevStep()
+    {
+        if (StateService.CurrentStep > 0)
+        {
+            await StateService.PreviousStepAsync();
+        }
     }
 
     private async Task OnSubmit()
     {
-        await WizardService.SubmitFormAsync(_formData);
+        await WizardService.SubmitFormAsync(StateService.FormData);
         _submitted = true;
+
+        // Clear the state after successful submission
+        await StateService.ClearStateAsync();
     }
 }

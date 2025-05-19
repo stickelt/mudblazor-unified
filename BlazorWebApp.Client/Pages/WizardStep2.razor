@@ -1,8 +1,11 @@
-﻿@using BlazorWebApp.Shared
+@using BlazorWebApp.Shared
 @using MudBlazor
+@using BlazorWebApp.Client.Services
+@inject WizardStateService StateService
 
 <MudTextField Label="Last Name"
-              @bind-Value="FormData.LastName"
+              Value="FormData.LastName"
+              ValueChanged="@(async (string val) => await OnLastNameChanged(val))"
               Required="true"
               Variant="Variant.Outlined"
               FullWidth="true"
@@ -11,4 +14,10 @@
 
 @code {
     [Parameter] public required WizardFormData FormData { get; set; }
+    
+    private async Task OnLastNameChanged(string value)
+    {
+        FormData.LastName = value;
+        await StateService.UpdateFormDataAsync(FormData);
+    }
 }
