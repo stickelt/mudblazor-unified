@@ -27,7 +27,7 @@
                     <MudText Typo="Typo.h6" Class="mb-4">Last Name</MudText>
                     <BlazorWebApp.Client.Pages.WizardStep2 FormData="StateService.FormData" />
                     <div class="d-flex justify-space-between mt-4">
-                        <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Back</MudButton>
+                        <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Previous</MudButton>
                         <MudButton T="string" Variant="Variant.Filled" Color="Color.Primary" OnClick="@NextStep">Next</MudButton>
                     </div>
                 </MudStep>
@@ -35,12 +35,17 @@
                     <MudText Typo="Typo.h6" Class="mb-4">Review Your Information</MudText>
                     <BlazorWebApp.Client.Pages.WizardReview FormData="StateService.FormData" />
                     <div class="d-flex justify-space-between mt-4">
-                        <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Back</MudButton>
+                        <MudButton T="string" Variant="Variant.Outlined" OnClick="@PrevStep">Previous</MudButton>
                         <MudButton T="string" Variant="Variant.Filled" Color="Color.Success" OnClick="@OnSubmit">Submit</MudButton>
                     </div>
                     @if (_submitted)
                     {
-                        <MudAlert Severity="Severity.Success" Class="mt-4">Form submitted successfully!</MudAlert>
+                        <MudAlert Severity="Severity.Success" Class="mt-4">
+                            Form submitted successfully! Data was sent to the server.
+                            <MudText Typo="Typo.caption">
+                                (In a real app, this would be saved to a database. Check server logs for details.)
+                            </MudText>
+                        </MudAlert>
                     }
                 </MudStep>
             </MudStepper>
@@ -55,7 +60,8 @@
         <MudText Typo="Typo.subtitle1" Color="Color.Primary">Debug Information (Main Wizard)</MudText>
         <MudText Typo="Typo.body2"><strong>Current Step:</strong> @StateService.CurrentStep</MudText>
         <MudText Typo="Typo.body2"><strong>Submitted:</strong> @_submitted</MudText>
-        <MudText Typo="Typo.body2"><strong>Form Data:</strong></MudText>
+        <MudText Typo="Typo.body2"><strong>Storage Method:</strong> In-memory state + localStorage persistence</MudText>
+        <MudText Typo="Typo.body2"><strong>Form Data (In-Memory):</strong></MudText>
         <MudText Typo="Typo.caption" Style="word-break: break-all; font-family: monospace;">
             @JsonSerializer.Serialize(StateService.FormData, new JsonSerializerOptions { WriteIndented = true })
         </MudText>
@@ -138,11 +144,43 @@
 
     private async Task ShowLocalStorageData()
     {
-        await LogToConsole("Showing localStorage data");
-        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardData:",
-            await JSRuntime.InvokeAsync<string>("eval", "JSON.stringify(JSON.parse(localStorage.getItem('wizardData')), null, 2)"));
-        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardStep:",
-            await JSRuntime.InvokeAsync<string>("eval", "localStorage.getItem('wizardStep')"));
+        try
+        {
+            await LogToConsole("Showing localStorage data");
+
+            // Get data from localStorage
+            var wizardDataJson = await JSRuntime.InvokeAsync<string>("eval",
+                "localStorage.getItem('wizardData') ? JSON.stringify(JSON.parse(localStorage.getItem('wizardData')), null, 2) : 'null'");
+            var wizardStep = await JSRuntime.InvokeAsync<string>("eval",
+                "localStorage.getItem('wizardStep') || 'null'");
+
+            // Log to console
+            await JSRuntime.InvokeVoidAsync("console.log", "===== WIZARD STATE STORAGE =====");
+            await JSRuntime.InvokeVoidAsync("console.log", "1. In-Memory State:");
+            await JSRuntime.InvokeVoidAsync("console.log", "   Current Step:", StateService.CurrentStep);
+            await JSRuntime.InvokeVoidAsync("console.log", "   Form Data:", StateService.FormData);
+
+            await JSRuntime.InvokeVoidAsync("console.log", "2. LocalStorage State:");
+            await JSRuntime.InvokeVoidAsync("console.log", "   wizardStep:", wizardStep);
+            await JSRuntime.InvokeVoidAsync("console.log", "   wizardData:", wizardDataJson);
+
+            await JSRuntime.InvokeVoidAsync("console.log", "===== END WIZARD STATE STORAGE =====");
+
+            // Also show an alert for better visibility
+            await JSRuntime.InvokeVoidAsync("alert",
+                $"State is stored in both memory and localStorage.\n\n" +
+                $"Current Step: {StateService.CurrentStep}\n" +
+                $"localStorage Step: {wizardStep}\n\n" +
+                $"See browser console for complete data.");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+        {
+            // Ignore JavaScript interop errors during prerendering
+        }
+        catch (Exception ex)
+        {
+            await LogToConsole($"Error showing localStorage data: {ex.Message}");
+        }
     }
 
     private async Task LogToConsole(string message)
