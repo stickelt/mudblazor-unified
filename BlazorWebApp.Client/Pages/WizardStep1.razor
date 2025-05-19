@@ -35,16 +35,13 @@
     // Set to true to show debug information
     private bool ShowDebugInfo = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LogToConsole("WizardStep1 initialized");
-        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await LogToConsole("WizardStep1 parameters set");
-        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+        if (firstRender)
+        {
+            await LogToConsole("WizardStep1 initialized");
+            await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+        }
     }
 
     private async Task OnFirstNameChanged(string value)
@@ -57,9 +54,16 @@
 
     private async Task LogToConsole(string message)
     {
-        if (ShowDebugInfo)
+        if (ShowDebugInfo && !string.IsNullOrEmpty(message))
         {
-            await JSRuntime.InvokeVoidAsync("console.log", $"[WizardStep1] {message}");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", $"[WizardStep1] {message}");
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // Ignore JavaScript interop errors during prerendering
+            }
         }
     }
 }

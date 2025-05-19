@@ -77,10 +77,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LogToConsole("Wizard initialized");
         await StateService.InitializeAsync();
-        await LogToConsole($"State initialized. Current step: {StateService.CurrentStep}");
-        await LogToConsole($"FormData: {JsonSerializer.Serialize(StateService.FormData)}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LogToConsole("Wizard initialized");
+            await LogToConsole($"State initialized. Current step: {StateService.CurrentStep}");
+            await LogToConsole($"FormData: {JsonSerializer.Serialize(StateService.FormData)}");
+        }
     }
 
     private async Task NextStep()
@@ -140,9 +147,17 @@
 
     private async Task LogToConsole(string message)
     {
-        if (ShowDebugInfo)
+        if (ShowDebugInfo && !string.IsNullOrEmpty(message))
         {
-            await JSRuntime.InvokeVoidAsync("console.log", $"[Wizard] {message}");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", $"[Wizard] {message}");
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // Ignore JavaScript interop errors during prerendering
+                // We'll log to console after the component is rendered
+            }
         }
     }
 }

@@ -44,6 +44,13 @@ namespace BlazorWebApp.Client.Services
                 if (savedData != null)
                     FormData = savedData;
             }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // During prerendering, we can't access localStorage
+                // We'll initialize with default values and load from localStorage after rendering
+                CurrentStep = 0;
+                FormData = new WizardFormData();
+            }
             catch (Exception)
             {
                 // If there's an error loading from localStorage, use default values
@@ -117,8 +124,16 @@ namespace BlazorWebApp.Client.Services
         /// </summary>
         private async Task SaveStateAsync()
         {
-            await _localStorage.SetItemAsync(WIZARD_STEP_KEY, CurrentStep);
-            await _localStorage.SetItemAsync(WIZARD_DATA_KEY, FormData);
+            try
+            {
+                await _localStorage.SetItemAsync(WIZARD_STEP_KEY, CurrentStep);
+                await _localStorage.SetItemAsync(WIZARD_DATA_KEY, FormData);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // Ignore localStorage errors during prerendering
+                // We'll save to localStorage after the component is rendered
+            }
         }
 
         /// <summary>
@@ -126,11 +141,21 @@ namespace BlazorWebApp.Client.Services
         /// </summary>
         public async Task ClearStateAsync()
         {
-            await _localStorage.RemoveItemAsync(WIZARD_STEP_KEY);
-            await _localStorage.RemoveItemAsync(WIZARD_DATA_KEY);
-            FormData = new WizardFormData();
-            CurrentStep = 0;
-            NotifyStateChanged();
+            try
+            {
+                await _localStorage.RemoveItemAsync(WIZARD_STEP_KEY);
+                await _localStorage.RemoveItemAsync(WIZARD_DATA_KEY);
+                FormData = new WizardFormData();
+                CurrentStep = 0;
+                NotifyStateChanged();
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // Ignore localStorage errors during prerendering
+                FormData = new WizardFormData();
+                CurrentStep = 0;
+                NotifyStateChanged();
+            }
         }
 
         /// <summary>

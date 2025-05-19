@@ -43,32 +43,43 @@
     // Set to true to show debug information
     private bool ShowDebugInfo = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LogToConsole("WizardReview initialized");
-        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await LogToConsole("WizardReview parameters set");
-        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+        if (firstRender)
+        {
+            await LogToConsole("WizardReview initialized");
+            await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+        }
     }
 
     private async Task ShowLocalStorageData()
     {
-        await LogToConsole("Showing localStorage data");
-        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardData:",
-            await JSRuntime.InvokeAsync<string>("eval", "JSON.stringify(JSON.parse(localStorage.getItem('wizardData')), null, 2)"));
-        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardStep:",
-            await JSRuntime.InvokeAsync<string>("eval", "localStorage.getItem('wizardStep')"));
+        try
+        {
+            await LogToConsole("Showing localStorage data");
+            await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardData:",
+                await JSRuntime.InvokeAsync<string>("eval", "JSON.stringify(JSON.parse(localStorage.getItem('wizardData')), null, 2)"));
+            await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardStep:",
+                await JSRuntime.InvokeAsync<string>("eval", "localStorage.getItem('wizardStep')"));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+        {
+            // Ignore JavaScript interop errors during prerendering
+        }
     }
 
     private async Task LogToConsole(string message)
     {
-        if (ShowDebugInfo)
+        if (ShowDebugInfo && !string.IsNullOrEmpty(message))
         {
-            await JSRuntime.InvokeVoidAsync("console.log", $"[WizardReview] {message}");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("console.log", $"[WizardReview] {message}");
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("prerendering"))
+            {
+                // Ignore JavaScript interop errors during prerendering
+            }
         }
     }
 }
