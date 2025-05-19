@@ -1,5 +1,9 @@
 ﻿@using BlazorWebApp.Shared
 @using MudBlazor
+@using BlazorWebApp.Client.Services
+@using System.Text.Json
+@inject WizardStateService StateService
+@inject IJSRuntime JSRuntime
 
 <MudPaper Class="pa-4 mb-4" Elevation="0">
     <MudList T="string">
@@ -14,6 +18,57 @@
     </MudList>
 </MudPaper>
 
+@if (ShowDebugInfo)
+{
+    <MudDivider Class="my-4" />
+    <MudPaper Elevation="0" Class="pa-4 mud-background-gray">
+        <MudText Typo="Typo.subtitle1" Color="Color.Primary">Debug Information (Review Step)</MudText>
+        <MudText Typo="Typo.body2"><strong>Current Step:</strong> @StateService.CurrentStep</MudText>
+        <MudText Typo="Typo.body2"><strong>First Name:</strong> @FormData.FirstName</MudText>
+        <MudText Typo="Typo.body2"><strong>Last Name:</strong> @FormData.LastName</MudText>
+        <MudText Typo="Typo.body2"><strong>Form Data JSON:</strong></MudText>
+        <MudText Typo="Typo.caption" Style="word-break: break-all; font-family: monospace;">
+            @JsonSerializer.Serialize(FormData, new JsonSerializerOptions { WriteIndented = true })
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mt-2"><strong>LocalStorage Data:</strong></MudText>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ShowLocalStorageData" Class="mt-1">
+            Show LocalStorage Data
+        </MudButton>
+    </MudPaper>
+}
+
 @code {
     [Parameter] public required WizardFormData FormData { get; set; }
+
+    // Set to true to show debug information
+    private bool ShowDebugInfo = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LogToConsole("WizardReview initialized");
+        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LogToConsole("WizardReview parameters set");
+        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+    }
+
+    private async Task ShowLocalStorageData()
+    {
+        await LogToConsole("Showing localStorage data");
+        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardData:",
+            await JSRuntime.InvokeAsync<string>("eval", "JSON.stringify(JSON.parse(localStorage.getItem('wizardData')), null, 2)"));
+        await JSRuntime.InvokeVoidAsync("console.log", "localStorage wizardStep:",
+            await JSRuntime.InvokeAsync<string>("eval", "localStorage.getItem('wizardStep')"));
+    }
+
+    private async Task LogToConsole(string message)
+    {
+        if (ShowDebugInfo)
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", $"[WizardReview] {message}");
+        }
+    }
 }

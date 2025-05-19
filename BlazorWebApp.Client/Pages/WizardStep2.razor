@@ -1,7 +1,9 @@
 @using BlazorWebApp.Shared
 @using MudBlazor
 @using BlazorWebApp.Client.Services
+@using System.Text.Json
 @inject WizardStateService StateService
+@inject IJSRuntime JSRuntime
 
 <MudTextField Label="Last Name"
               Value="FormData.LastName"
@@ -12,12 +14,52 @@
               Immediate="true"
               Placeholder="Enter your last name" />
 
+@if (ShowDebugInfo)
+{
+    <MudDivider Class="my-4" />
+    <MudPaper Elevation="0" Class="pa-4 mud-background-gray">
+        <MudText Typo="Typo.subtitle1" Color="Color.Primary">Debug Information (Step 2)</MudText>
+        <MudText Typo="Typo.body2"><strong>Current Step:</strong> @StateService.CurrentStep</MudText>
+        <MudText Typo="Typo.body2"><strong>First Name:</strong> @FormData.FirstName</MudText>
+        <MudText Typo="Typo.body2"><strong>Last Name:</strong> @FormData.LastName</MudText>
+        <MudText Typo="Typo.body2"><strong>Form Data JSON:</strong></MudText>
+        <MudText Typo="Typo.caption" Style="word-break: break-all; font-family: monospace;">
+            @JsonSerializer.Serialize(FormData, new JsonSerializerOptions { WriteIndented = true })
+        </MudText>
+    </MudPaper>
+}
+
 @code {
     [Parameter] public required WizardFormData FormData { get; set; }
-    
+
+    // Set to true to show debug information
+    private bool ShowDebugInfo = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LogToConsole("WizardStep2 initialized");
+        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LogToConsole("WizardStep2 parameters set");
+        await LogToConsole($"FormData: {JsonSerializer.Serialize(FormData)}");
+    }
+
     private async Task OnLastNameChanged(string value)
     {
         FormData.LastName = value;
         await StateService.UpdateFormDataAsync(FormData);
+        await LogToConsole($"Last name changed to: {value}");
+        await LogToConsole($"Updated FormData: {JsonSerializer.Serialize(FormData)}");
+    }
+
+    private async Task LogToConsole(string message)
+    {
+        if (ShowDebugInfo)
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", $"[WizardStep2] {message}");
+        }
     }
 }
