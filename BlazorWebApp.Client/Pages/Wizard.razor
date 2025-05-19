@@ -5,9 +5,12 @@
 @using BlazorWebApp.Client.Pages
 @using BlazorWebApp.Client.Services
 @using System.Text.Json
+@using System.Net.Http.Json
 @inject IWizardFormService WizardService
 @inject WizardStateService StateService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject HttpClient httpClient
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     <MudCard Elevation="3" Class="rounded-lg">
@@ -45,6 +48,15 @@
                             <MudText Typo="Typo.caption">
                                 (In a real app, this would be saved to a database. Check server logs for details.)
                             </MudText>
+
+                            @if (_serverResponse != null)
+                            {
+                                <MudDivider Class="my-2" />
+                                <MudText Typo="Typo.subtitle2" Color="Color.Primary">Server Response:</MudText>
+                                <MudText Typo="Typo.caption">Response ID: @_serverResponse.GetValueOrDefault("responseId")</MudText>
+                                <MudText Typo="Typo.caption">Timestamp: @_serverResponse.GetValueOrDefault("timestamp")</MudText>
+                                <MudText Typo="Typo.caption">Server: @_serverResponse.GetValueOrDefault("serverInfo")</MudText>
+                            }
                         </MudAlert>
                     }
                 </MudStep>
@@ -80,6 +92,7 @@
 @code {
     private bool _submitted = false;
     private bool ShowDebugInfo = true;
+    private Dictionary<string, object> _serverResponse = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,15 +131,58 @@
 
     private async Task OnSubmit()
     {
-        await LogToConsole("OnSubmit called");
-        await LogToConsole($"Submitting form data: {JsonSerializer.Serialize(StateService.FormData)}");
-        await WizardService.SubmitFormAsync(StateService.FormData);
-        _submitted = true;
-        await LogToConsole("Form submitted successfully");
+        try
+        {
+            await LogToConsole("OnSubmit called");
+            await LogToConsole($"Submitting form data: {JsonSerializer.Serialize(StateService.FormData)}");
 
-        // Clear the state after successful submission
-        await StateService.ClearStateAsync();
-        await LogToConsole("State cleared");
+            // Call the API endpoint directly to capture the response
+            var response = await httpClient.PostAsJsonAsync("api/wizard/submit", StateService.FormData);
+
+            // Check if the request was successful
+            if (response.IsSuccessStatusCode)
+            {
+                // Read the response content
+                _serverResponse = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+
+                _submitted = true;
+                await LogToConsole($"Form submitted successfully. Server response: {JsonSerializer.Serialize(_serverResponse)}");
+
+                // Clear the state after successful submission
+                await StateService.ClearStateAsync();
+                await LogToConsole("State cleared");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await LogToConsole($"Server returned error: {response.StatusCode}, {errorMessage}");
+                // You could show an error message to the user here
+            }
+        }
+        catch (Exception ex)
+        {
+            await LogToConsole($"Error submitting form: {ex.Message}");
+
+            // Fallback to the regular service
+            try
+            {
+                await WizardService.SubmitFormAsync(StateService.FormData);
+                _serverResponse = new Dictionary<string, object>
+                {
+                    { "message", "Form submitted (fallback method)" },
+                    { "timestamp", DateTime.Now.ToString() },
+                    { "responseId", "fallback" }
+                };
+                _submitted = true;
+
+                // Clear the state after successful submission
+                await StateService.ClearStateAsync();
+            }
+            catch (Exception innerEx)
+            {
+                await LogToConsole($"Fallback submission also failed: {innerEx.Message}");
+            }
+        }
     }
 
     private async Task ToggleDebugMode()

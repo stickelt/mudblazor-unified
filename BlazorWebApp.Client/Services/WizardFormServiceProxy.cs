@@ -21,6 +21,8 @@ namespace BlazorWebApp.Client.Services
             {
                 Console.WriteLine($"[Client] Submitting form: {data.FirstName} {data.LastName}");
 
+                Console.WriteLine("[CLIENT] Sending form data to server API endpoint: api/wizard/submit");
+
                 // Call the API endpoint
                 var response = await _httpClient.PostAsJsonAsync("api/wizard/submit", data);
 
@@ -28,11 +30,22 @@ namespace BlazorWebApp.Client.Services
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[Client] Server returned error: {response.StatusCode}, {errorMessage}");
+                    Console.WriteLine($"[CLIENT ERROR] Server returned error: {response.StatusCode}, {errorMessage}");
                     throw new Exception($"Server returned {response.StatusCode}: {errorMessage}");
                 }
 
-                Console.WriteLine("[Client] Form submitted successfully to server");
+                // Read and display the server response
+                var responseContent = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+
+                Console.WriteLine("*******************************************************************");
+                Console.WriteLine("[CLIENT] SERVER RESPONSE RECEIVED:");
+                foreach (var item in responseContent)
+                {
+                    Console.WriteLine($"[CLIENT] {item.Key}: {item.Value}");
+                }
+                Console.WriteLine("*******************************************************************");
+
+                Console.WriteLine("[CLIENT] Form submitted successfully to server");
             }
             catch (Exception ex)
             {

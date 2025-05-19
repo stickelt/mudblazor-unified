@@ -18,18 +18,35 @@ namespace BlazorWebApp.Controllers
         {
             try
             {
-                // Log the incoming request
-                Console.WriteLine($"[Server] Received form submission: {data.FirstName} {data.LastName}");
+                // Add very visible logging to confirm the controller method was called
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("*******************************************************************");
+                Console.WriteLine($"*** SERVER CONTROLLER: Received form submission at {DateTime.Now} ***");
+                Console.WriteLine($"*** First Name: {data.FirstName}");
+                Console.WriteLine($"*** Last Name: {data.LastName}");
+                Console.WriteLine("*******************************************************************");
+                Console.ResetColor();
 
                 // Process the form data
                 await _service.SubmitFormAsync(data);
 
-                // Return success response
-                return Ok(new { message = "Form submitted successfully" });
+                // Return a response with a unique identifier to verify in the client
+                var responseId = Guid.NewGuid().ToString("N").Substring(0, 8);
+                return Ok(new {
+                    message = "Form submitted successfully",
+                    timestamp = DateTime.Now,
+                    responseId = responseId,
+                    serverInfo = Environment.MachineName
+                });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Server] Error processing form: {ex.Message}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("*******************************************************************");
+                Console.WriteLine($"*** SERVER CONTROLLER ERROR: {ex.Message}");
+                Console.WriteLine("*******************************************************************");
+                Console.ResetColor();
+
                 return StatusCode(500, "An error occurred while processing the form");
             }
         }
