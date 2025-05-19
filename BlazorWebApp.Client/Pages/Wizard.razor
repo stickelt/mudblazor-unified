@@ -15,7 +15,7 @@
             <MudText Typo="Typo.h5">Multi-Step Form</MudText>
         </MudCardHeader>
         <MudCardContent>
-            <MudStepper @bind-Value="StateService.CurrentStep" Linear="true" Color="Color.Primary">
+            <MudStepper @bind-Value="StateService.CurrentStep" Linear="true" Color="Color.Primary" DisableStepNavigation="true">
                 <MudStep Title="Personal Info" Icon="@Icons.Material.Filled.Person">
                     <MudText Typo="Typo.h6" Class="mb-4">First Name</MudText>
                     <BlazorWebApp.Client.Pages.WizardStep1 FormData="StateService.FormData" />
