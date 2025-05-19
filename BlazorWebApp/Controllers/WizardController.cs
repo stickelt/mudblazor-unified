@@ -13,11 +13,25 @@ namespace BlazorWebApp.Controllers
         {
             _service = service;
         }
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] WizardFormData data)
+        [HttpPost("submit")]
+        public async Task<IActionResult> Submit([FromBody] WizardFormData data)
         {
-            await _service.SubmitFormAsync(data);
-            return Ok();
+            try
+            {
+                // Log the incoming request
+                Console.WriteLine($"[Server] Received form submission: {data.FirstName} {data.LastName}");
+
+                // Process the form data
+                await _service.SubmitFormAsync(data);
+
+                // Return success response
+                return Ok(new { message = "Form submitted successfully" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Server] Error processing form: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing the form");
+            }
         }
     }
 }

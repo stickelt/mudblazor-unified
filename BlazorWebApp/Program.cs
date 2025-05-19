@@ -9,6 +9,8 @@ using MudBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers(); // Add support for API controllers
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents() // components run on the server an the browser ui updates via SignalR/Websockets  (classic blazor server)
     .AddInteractiveWebAssemblyComponents();  // allows parts of the app to render and run on the client ( the the broswer via WASM)
@@ -48,6 +50,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// Map controllers
+app.MapControllers();
+
+// Map Razor components
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()

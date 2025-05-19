@@ -19,16 +19,24 @@ namespace BlazorWebApp.Client.Services
         {
             try
             {
-                // In a real application, this would call an API endpoint
-                // For now, we'll just log to the console
                 Console.WriteLine($"[Client] Submitting form: {data.FirstName} {data.LastName}");
-                
-                // Uncomment this when you have an API endpoint to call
-                // await _httpClient.PostAsJsonAsync("api/wizard/submit", data);
+
+                // Call the API endpoint
+                var response = await _httpClient.PostAsJsonAsync("api/wizard/submit", data);
+
+                // Check if the request was successful
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[Client] Server returned error: {response.StatusCode}, {errorMessage}");
+                    throw new Exception($"Server returned {response.StatusCode}: {errorMessage}");
+                }
+
+                Console.WriteLine("[Client] Form submitted successfully to server");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error submitting form: {ex.Message}");
+                Console.WriteLine($"[Client] Error submitting form: {ex.Message}");
                 throw;
             }
         }
