@@ -2,12 +2,12 @@
 @using MudBlazor
 
 <MudPaper Class="pa-4 mb-4" Elevation="0">
-    <MudList>
-        <MudListItem>
+    <MudList T="string">
+        <MudListItem T="string">
             <MudText Typo="Typo.subtitle1" Class="mr-2 d-inline-block" Style="width: 120px; font-weight: 500;">First Name:</MudText>
             <MudText Typo="Typo.body1" Class="d-inline-block">@FormData.FirstName</MudText>
         </MudListItem>
-        <MudListItem>
+        <MudListItem T="string">
             <MudText Typo="Typo.subtitle1" Class="mr-2 d-inline-block" Style="width: 120px; font-weight: 500;">Last Name:</MudText>
             <MudText Typo="Typo.body1" Class="d-inline-block">@FormData.LastName</MudText>
         </MudListItem>
