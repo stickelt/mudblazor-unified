@@ -27,7 +27,13 @@ builder.Services.AddScoped<IWizardFormService, BlazorWebApp.Services.WizardFormS
 // Register client-side services for server-side rendering of client components
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<WizardStateService>();
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["BaseAddress"] ?? builder.Environment.ContentRootPath) });
+// Register HttpClient with a proper base address
+builder.Services.AddScoped(sp =>
+{
+    // Create HttpClient with the correct base address
+    var navigationManager = sp.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+});
 
 builder.Services.AddMudServices();
 //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)})

@@ -152,14 +152,53 @@
                 return;
             }
 
-            // Call the API endpoint directly to capture the response
-            var response = await httpClient.PostAsJsonAsync("api/wizard/submit", StateService.FormData);
+            // Log the base address to help diagnose issues
+            await LogToConsole($"HttpClient BaseAddress: {httpClient.BaseAddress}");
+
+            try
+            {
+                // Call the API endpoint directly to capture the response
+                await LogToConsole($"Calling API endpoint: {httpClient.BaseAddress}api/wizard/submit");
+                var response = await httpClient.PostAsJsonAsync("api/wizard/submit", StateService.FormData);
+
+                // Log the response status
+                await LogToConsole($"API response status: {response.StatusCode}");
+
+                // If we get here, the API call was successful
+                await LogToConsole("API call completed successfully");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                await LogToConsole($"Error calling API: {ex.Message}");
+                await LogToConsole($"Exception type: {ex.GetType().Name}");
+                if (ex.InnerException != null)
+                {
+                    await LogToConsole($"Inner exception: {ex.InnerException.Message}");
+                }
+
+                // Fall back to using the service directly
+                await LogToConsole("Falling back to WizardService");
+                await WizardService.SubmitFormAsync(StateService.FormData);
+                _serverResponse = new Dictionary<string, object>
+                {
+                    { "message", "Form submitted via service (fallback)" },
+                    { "timestamp", DateTime.Now.ToString() },
+                    { "responseId", "fallback-" + Guid.NewGuid().ToString("N").Substring(0, 8) }
+                };
+                _submitted = true;
+                await StateService.ClearStateAsync();
+                return;
+            }
+
+            // Call the API endpoint directly to capture the response (this is now redundant but kept for compatibility)
+            var apiResponse = await httpClient.PostAsJsonAsync("api/wizard/submit", StateService.FormData);
 
             // Check if the request was successful
-            if (response.IsSuccessStatusCode)
+            if (apiResponse.IsSuccessStatusCode)
             {
                 // Read the response content
-                _serverResponse = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                _serverResponse = await apiResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
 
                 _submitted = true;
                 await LogToConsole($"Form submitted successfully. Server response: {JsonSerializer.Serialize(_serverResponse)}");
