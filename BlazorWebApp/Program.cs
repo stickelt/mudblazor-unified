@@ -1,6 +1,7 @@
 using BlazorWebApp.Client.Pages;
 using BlazorWebApp.Client.Services;
 using BlazorWebApp.Components;
+using BlazorWebApp.Services;
 using BlazorWebApp.Shared;
 using Blazored.LocalStorage;
 using MudBlazor.Services;
@@ -17,7 +18,7 @@ builder.Services.AddRazorComponents()
 
 
 // Register server-side services
-builder.Services.AddScoped<IWizardFormService, WizardFormService>();
+builder.Services.AddScoped<IWizardFormService, BlazorWebApp.Services.WizardFormService>();
 //  above is scoped -  one instance of the service is created per http request  (  or per user circuit in blazor server)
 // shouldn't be shared across all users ( that is a singleton
 
