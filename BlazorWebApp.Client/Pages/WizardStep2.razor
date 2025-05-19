@@ -1,0 +1,14 @@
+﻿@using BlazorWebApp.Shared
+@using MudBlazor
+
+<MudTextField Label="Last Name"
+              @bind-Value="FormData.LastName"
+              Required="true"
+              Variant="Variant.Outlined"
+              FullWidth="true"
+              Immediate="true"
+              Placeholder="Enter your last name" />
+
+@code {
+    [Parameter] public required WizardFormData FormData { get; set; }
+}

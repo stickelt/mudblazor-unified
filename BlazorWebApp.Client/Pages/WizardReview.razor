@@ -1,0 +1,19 @@
+﻿@using BlazorWebApp.Shared
+@using MudBlazor
+
+<MudPaper Class="pa-4 mb-4" Elevation="0">
+    <MudList>
+        <MudListItem>
+            <MudText Typo="Typo.subtitle1" Class="mr-2 d-inline-block" Style="width: 120px; font-weight: 500;">First Name:</MudText>
+            <MudText Typo="Typo.body1" Class="d-inline-block">@FormData.FirstName</MudText>
+        </MudListItem>
+        <MudListItem>
+            <MudText Typo="Typo.subtitle1" Class="mr-2 d-inline-block" Style="width: 120px; font-weight: 500;">Last Name:</MudText>
+            <MudText Typo="Typo.body1" Class="d-inline-block">@FormData.LastName</MudText>
+        </MudListItem>
+    </MudList>
+</MudPaper>
+
+@code {
+    [Parameter] public required WizardFormData FormData { get; set; }
+}

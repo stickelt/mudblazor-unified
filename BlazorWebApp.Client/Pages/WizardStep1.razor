@@ -1,0 +1,20 @@
+﻿@using BlazorWebApp.Shared
+@using MudBlazor
+
+<MudTextField Label="First Name"
+              @bind-Value="FormData.FirstName"
+              Required="true"
+              Variant="Variant.Outlined"
+              FullWidth="true"
+              Immediate="true"
+              Placeholder="Enter your first name" />
+
+@code {
+    [Parameter] public required WizardFormData FormData { get; set; }
+    // Parameter is blazor specific,  it tell blazor  "this property CAN be set by the parent component or by markup
+    // whenever the component is used
+
+
+    //[CascadingParameter] is another Blazor attribute for properties, but it’s for receiving data “from above”
+    // in the component hierarchy—without the parent having to pass it directly.
+}

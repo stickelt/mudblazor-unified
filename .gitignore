@@ -1,0 +1,101 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+# DotCover
+.idea/
+*.dotCover
+
+# NCrunch
+*.ncrunch*
+*.nunit.*
+
+# MSTest test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Azure functions local settings
+local.settings.json
+
+# Other files to ignore
+*.dbmdl
+*.bak
+*.backup
+*.swp
+*.tmp
+
+# Publish results
+publish/
+out/
+
+# npm packages (for JS/Blazor/SPA projects)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Blazor cache
+wwwroot/.staticwebassets.build.json
+wwwroot/.staticwebassets.runtime.json
+
+# Coverage results
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+
+# User secrets
+secrets.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS for Mac
+*.pidb
+*.userprefs
+
+# Temporary files
+~$*
+
+# Docker artifacts
+**/docker-compose*.yaml
+**/docker-compose*.yml
