@@ -15,6 +15,14 @@
                 This demo allows you to send and receive messages using Azure Service Bus queues and topics.
             </MudText>
 
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Info"
+                       OnClick="TestConnection"
+                       StartIcon="@Icons.Material.Filled.CheckCircle"
+                       Class="mb-4">
+                Test Connection
+            </MudButton>
+
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
                 <MudTabPanel Text="Queue">
                     <MudGrid>
@@ -24,25 +32,25 @@
                                 Send messages to a queue and receive them in a first-in, first-out (FIFO) manner.
                             </MudText>
                         </MudItem>
-                        
+
                         <MudItem xs="12" md="6">
                             <MudCard Elevation="2" Class="pa-4">
                                 <MudCardHeader>
                                     <MudText Typo="Typo.h6">Send Message to Queue</MudText>
                                 </MudCardHeader>
                                 <MudCardContent>
-                                    <MudTextField @bind-Value="QueueMessage" Label="Message" 
+                                    <MudTextField @bind-Value="QueueMessage" Label="Message"
                                                  Variant="Variant.Outlined" Lines="3" />
-                                    
-                                    <MudTextField @bind-Value="QueueName" Label="Queue Name (optional)" 
-                                                 Variant="Variant.Outlined" 
-                                                 HelperText="Leave empty to use default queue" 
+
+                                    <MudTextField @bind-Value="QueueName" Label="Queue Name (optional)"
+                                                 Variant="Variant.Outlined"
+                                                 HelperText="Leave empty to use default queue"
                                                  Class="mt-3" />
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Variant="Variant.Filled" 
-                                               Color="Color.Primary" 
-                                               OnClick="SendToQueue" 
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               OnClick="SendToQueue"
                                                Disabled="@(string.IsNullOrEmpty(QueueMessage) || IsBusy)"
                                                StartIcon="@Icons.Material.Filled.Send">
                                         Send
@@ -50,25 +58,25 @@
                                 </MudCardActions>
                             </MudCard>
                         </MudItem>
-                        
+
                         <MudItem xs="12" md="6">
                             <MudCard Elevation="2" Class="pa-4">
                                 <MudCardHeader>
                                     <MudText Typo="Typo.h6">Receive Message from Queue</MudText>
                                 </MudCardHeader>
                                 <MudCardContent>
-                                    <MudTextField @bind-Value="ReceivedQueueMessage" Label="Received Message" 
+                                    <MudTextField @bind-Value="ReceivedQueueMessage" Label="Received Message"
                                                  Variant="Variant.Outlined" Lines="3" ReadOnly="true" />
-                                    
-                                    <MudTextField @bind-Value="ReceiveQueueName" Label="Queue Name (optional)" 
-                                                 Variant="Variant.Outlined" 
-                                                 HelperText="Leave empty to use default queue" 
+
+                                    <MudTextField @bind-Value="ReceiveQueueName" Label="Queue Name (optional)"
+                                                 Variant="Variant.Outlined"
+                                                 HelperText="Leave empty to use default queue"
                                                  Class="mt-3" />
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Variant="Variant.Filled" 
-                                               Color="Color.Secondary" 
-                                               OnClick="ReceiveFromQueue" 
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Secondary"
+                                               OnClick="ReceiveFromQueue"
                                                Disabled="@IsBusy"
                                                StartIcon="@Icons.Material.Filled.Download">
                                         Receive
@@ -78,7 +86,7 @@
                         </MudItem>
                     </MudGrid>
                 </MudTabPanel>
-                
+
                 <MudTabPanel Text="Topic">
                     <MudGrid>
                         <MudItem xs="12">
@@ -87,25 +95,25 @@
                                 Send messages to a topic and receive them from a subscription.
                             </MudText>
                         </MudItem>
-                        
+
                         <MudItem xs="12" md="6">
                             <MudCard Elevation="2" Class="pa-4">
                                 <MudCardHeader>
                                     <MudText Typo="Typo.h6">Send Message to Topic</MudText>
                                 </MudCardHeader>
                                 <MudCardContent>
-                                    <MudTextField @bind-Value="TopicMessage" Label="Message" 
+                                    <MudTextField @bind-Value="TopicMessage" Label="Message"
                                                  Variant="Variant.Outlined" Lines="3" />
-                                    
-                                    <MudTextField @bind-Value="TopicName" Label="Topic Name (optional)" 
-                                                 Variant="Variant.Outlined" 
-                                                 HelperText="Leave empty to use default topic" 
+
+                                    <MudTextField @bind-Value="TopicName" Label="Topic Name (optional)"
+                                                 Variant="Variant.Outlined"
+                                                 HelperText="Leave empty to use default topic"
                                                  Class="mt-3" />
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Variant="Variant.Filled" 
-                                               Color="Color.Primary" 
-                                               OnClick="SendToTopic" 
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               OnClick="SendToTopic"
                                                Disabled="@(string.IsNullOrEmpty(TopicMessage) || IsBusy)"
                                                StartIcon="@Icons.Material.Filled.Send">
                                         Send
@@ -113,30 +121,30 @@
                                 </MudCardActions>
                             </MudCard>
                         </MudItem>
-                        
+
                         <MudItem xs="12" md="6">
                             <MudCard Elevation="2" Class="pa-4">
                                 <MudCardHeader>
                                     <MudText Typo="Typo.h6">Receive Message from Subscription</MudText>
                                 </MudCardHeader>
                                 <MudCardContent>
-                                    <MudTextField @bind-Value="ReceivedSubscriptionMessage" Label="Received Message" 
+                                    <MudTextField @bind-Value="ReceivedSubscriptionMessage" Label="Received Message"
                                                  Variant="Variant.Outlined" Lines="3" ReadOnly="true" />
-                                    
-                                    <MudTextField @bind-Value="ReceiveTopicName" Label="Topic Name (optional)" 
-                                                 Variant="Variant.Outlined" 
-                                                 HelperText="Leave empty to use default topic" 
+
+                                    <MudTextField @bind-Value="ReceiveTopicName" Label="Topic Name (optional)"
+                                                 Variant="Variant.Outlined"
+                                                 HelperText="Leave empty to use default topic"
                                                  Class="mt-3" />
-                                                 
-                                    <MudTextField @bind-Value="SubscriptionName" Label="Subscription Name (optional)" 
-                                                 Variant="Variant.Outlined" 
-                                                 HelperText="Leave empty to use default subscription" 
+
+                                    <MudTextField @bind-Value="SubscriptionName" Label="Subscription Name (optional)"
+                                                 Variant="Variant.Outlined"
+                                                 HelperText="Leave empty to use default subscription"
                                                  Class="mt-3" />
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Variant="Variant.Filled" 
-                                               Color="Color.Secondary" 
-                                               OnClick="ReceiveFromSubscription" 
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Secondary"
+                                               OnClick="ReceiveFromSubscription"
                                                Disabled="@IsBusy"
                                                StartIcon="@Icons.Material.Filled.Download">
                                         Receive
@@ -147,7 +155,7 @@
                     </MudGrid>
                 </MudTabPanel>
             </MudTabs>
-            
+
             @if (!string.IsNullOrEmpty(StatusMessage))
             {
                 <MudAlert Severity="@StatusSeverity" Class="mt-4" ShowCloseIcon="true" CloseIconClicked="() => StatusMessage = null">
@@ -164,19 +172,57 @@
     private string QueueName { get; set; } = string.Empty;
     private string ReceivedQueueMessage { get; set; } = string.Empty;
     private string ReceiveQueueName { get; set; } = string.Empty;
-    
+
     // Topic properties
     private string TopicMessage { get; set; } = string.Empty;
     private string TopicName { get; set; } = string.Empty;
     private string ReceivedSubscriptionMessage { get; set; } = string.Empty;
     private string ReceiveTopicName { get; set; } = string.Empty;
     private string SubscriptionName { get; set; } = string.Empty;
-    
+
     // Status properties
     private string? StatusMessage { get; set; }
     private Severity StatusSeverity { get; set; } = Severity.Info;
     private bool IsBusy { get; set; } = false;
-    
+
+    private async Task TestConnection()
+    {
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Testing Service Bus connection...";
+            StatusSeverity = Severity.Info;
+
+            // Call the test endpoint
+            var response = await ServiceBusClient.HttpClient.GetAsync("api/ServiceBus/test-connection");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                StatusMessage = $"Connection successful! {result?["message"]}";
+                StatusSeverity = Severity.Success;
+                await JSRuntime.InvokeVoidAsync("console.log", "Connection test successful", result);
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                StatusMessage = $"Connection test failed: {response.StatusCode}. {errorContent}";
+                StatusSeverity = Severity.Error;
+                await JSRuntime.InvokeVoidAsync("console.error", "Connection test failed", errorContent);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error testing connection: {ex.Message}";
+            StatusSeverity = Severity.Error;
+            await JSRuntime.InvokeVoidAsync("console.error", "Error testing connection", ex);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task SendToQueue()
     {
         try
@@ -184,9 +230,9 @@
             IsBusy = true;
             StatusMessage = "Sending message to queue...";
             StatusSeverity = Severity.Info;
-            
+
             var response = await ServiceBusClient.SendToQueueAsync(QueueMessage, QueueName);
-            
+
             if (response.Success)
             {
                 StatusMessage = $"Success: {response.Message}";
@@ -210,7 +256,7 @@
             IsBusy = false;
         }
     }
-    
+
     private async Task ReceiveFromQueue()
     {
         try
@@ -218,9 +264,9 @@
             IsBusy = true;
             StatusMessage = "Receiving message from queue...";
             StatusSeverity = Severity.Info;
-            
+
             var response = await ServiceBusClient.ReceiveFromQueueAsync(ReceiveQueueName);
-            
+
             if (response.Success)
             {
                 ReceivedQueueMessage = response.Message;
@@ -244,7 +290,7 @@
             IsBusy = false;
         }
     }
-    
+
     private async Task SendToTopic()
     {
         try
@@ -252,9 +298,9 @@
             IsBusy = true;
             StatusMessage = "Sending message to topic...";
             StatusSeverity = Severity.Info;
-            
+
             var response = await ServiceBusClient.SendToTopicAsync(TopicMessage, TopicName);
-            
+
             if (response.Success)
             {
                 StatusMessage = $"Success: {response.Message}";
@@ -278,7 +324,7 @@
             IsBusy = false;
         }
     }
-    
+
     private async Task ReceiveFromSubscription()
     {
         try
@@ -286,9 +332,9 @@
             IsBusy = true;
             StatusMessage = "Receiving message from subscription...";
             StatusSeverity = Severity.Info;
-            
+
             var response = await ServiceBusClient.ReceiveFromSubscriptionAsync(ReceiveTopicName, SubscriptionName);
-            
+
             if (response.Success)
             {
                 ReceivedSubscriptionMessage = response.Message;
