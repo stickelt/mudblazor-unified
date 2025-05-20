@@ -11,6 +11,9 @@ namespace BlazorWebApp.Client.Services
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
 
+        // Expose the HttpClient for direct access
+        public HttpClient HttpClient => _httpClient;
+
         // Default queue and topic names
         public const string DefaultQueueName = "stone-queue";
         public const string DefaultTopicName = "stone-topic";
@@ -34,13 +37,13 @@ namespace BlazorWebApp.Client.Services
             {
                 // Use default queue name if not provided
                 var queue = string.IsNullOrEmpty(queueName) ? DefaultQueueName : queueName;
-                
+
                 // Send the message to the queue
                 var response = await _httpClient.PostAsJsonAsync($"api/ServiceBus/queue/send?queueName={queue}", message);
-                
+
                 // Ensure the request was successful
                 response.EnsureSuccessStatusCode();
-                
+
                 // Parse the response
                 var result = await response.Content.ReadFromJsonAsync<ServiceBusResponse>(_jsonOptions);
                 return result ?? new ServiceBusResponse { Success = true, Message = "Message sent (no details returned)" };
@@ -61,13 +64,13 @@ namespace BlazorWebApp.Client.Services
             {
                 // Use default topic name if not provided
                 var topic = string.IsNullOrEmpty(topicName) ? DefaultTopicName : topicName;
-                
+
                 // Send the message to the topic
                 var response = await _httpClient.PostAsJsonAsync($"api/ServiceBus/topic/send?topicName={topic}", message);
-                
+
                 // Ensure the request was successful
                 response.EnsureSuccessStatusCode();
-                
+
                 // Parse the response
                 var result = await response.Content.ReadFromJsonAsync<ServiceBusResponse>(_jsonOptions);
                 return result ?? new ServiceBusResponse { Success = true, Message = "Message sent (no details returned)" };
@@ -88,13 +91,13 @@ namespace BlazorWebApp.Client.Services
             {
                 // Use default queue name if not provided
                 var queue = string.IsNullOrEmpty(queueName) ? DefaultQueueName : queueName;
-                
+
                 // Receive a message from the queue
                 var response = await _httpClient.GetAsync($"api/ServiceBus/queue/receive?queueName={queue}");
-                
+
                 // Ensure the request was successful
                 response.EnsureSuccessStatusCode();
-                
+
                 // Parse the response
                 var result = await response.Content.ReadFromJsonAsync<ServiceBusResponse>(_jsonOptions);
                 return result ?? new ServiceBusResponse { Success = true, Message = "No message available" };
@@ -110,7 +113,7 @@ namespace BlazorWebApp.Client.Services
         /// Receives a message from a Service Bus topic subscription
         /// </summary>
         public async Task<ServiceBusResponse> ReceiveFromSubscriptionAsync(
-            string? topicName = null, 
+            string? topicName = null,
             string? subscriptionName = null)
         {
             try
@@ -118,14 +121,14 @@ namespace BlazorWebApp.Client.Services
                 // Use default topic and subscription names if not provided
                 var topic = string.IsNullOrEmpty(topicName) ? DefaultTopicName : topicName;
                 var subscription = string.IsNullOrEmpty(subscriptionName) ? DefaultSubscriptionName : subscriptionName;
-                
+
                 // Receive a message from the subscription
                 var response = await _httpClient.GetAsync(
                     $"api/ServiceBus/subscription/receive?topicName={topic}&subscriptionName={subscription}");
-                
+
                 // Ensure the request was successful
                 response.EnsureSuccessStatusCode();
-                
+
                 // Parse the response
                 var result = await response.Content.ReadFromJsonAsync<ServiceBusResponse>(_jsonOptions);
                 return result ?? new ServiceBusResponse { Success = true, Message = "No message available" };
