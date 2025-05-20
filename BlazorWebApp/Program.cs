@@ -38,6 +38,9 @@ builder.Services.AddScoped(sp =>
     return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
 });
 
+// Register the Service Bus client service for server-side rendering
+builder.Services.AddScoped<BlazorWebApp.Client.Services.ServiceBusClientService>();
+
 builder.Services.AddMudServices();
 //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)})
 
